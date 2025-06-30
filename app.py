@@ -333,4 +333,4 @@ def order():
     return render_template('order.html', checkout_items=checkout_items, total_price=f"{total_price:.2f}", order_completed=False)
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True, host='0.0.0.0', port=5000)
