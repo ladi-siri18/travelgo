@@ -14,9 +14,9 @@ app = Flask(__name__)
 app.secret_key = '37947df6845abbca9bfa81363c79e879ed6cf98521fd2f80051350f8e80ec6e6'
 
 # AWS Setup using IAM Role
-REGION = 'ap-south-1'  # Replace with your actual AWS region
-dynamodb = boto3.resource('dynamodb', region_name=REGION)
-sns_client = boto3.client('sns', region_name=REGION)
+REGION = 'us-east-1'  # Replace with your actual AWS region
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+sns_client = boto3.client('sns', region_name='us-east-1')
 
 users_table = dynamodb.Table('travelgo_users')
 trains_table = dynamodb.Table('trains')
