@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Seats - {{ booking.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #f7fbff, #e6f0ff);
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            color: #2c3e50;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #004aad;
+            font-weight: 600;
+        }
+
+        .booking-details {
+            background: #fff;
+            padding: 25px;
+            margin: 0 auto 30px auto;
+            border-radius: 15px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            max-width: 700px;
+        }
+
+        .booking-details h5 {
+            font-weight: 600;
+            color: #004aad;
+            margin-bottom: 12px;
+        }
+
+        .booking-details p {
+            margin: 6px 0;
+            font-size: 15px;
+        }
+
+        .screen {
+            text-align: center;
+            font-weight: 500;
+            background: #004aad;
+            color: white;
+            padding: 10px 0;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: 0 auto 20px;
+        }
+
+        .seat-row {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .seat {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            border-radius: 8px;
+            background: #ecf0f1;
+            border: 1px solid #bbb;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 500;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .seat:hover {
+            transform: scale(1.05);
+        }
+
+        .seat.selected {
+            background: #007bff;
+            color: white;
+        }
+
+        .seat.occupied {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .btn-submit {
+            margin-top: 30px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 12px 28px;
+            font-size: 16px;
+            border-radius: 30px;
+            background-color: #004aad;
+            color: white;
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #003b8b;
+        }
+
+        @media (max-width: 576px) {
+            .seat {
+                width: 42px;
+                height: 42px;
+                line-height: 42px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h2>Select Your Seats</h2>
+
+<div class="booking-details">
+    <h5>{{ booking.name }} {% if booking.trainNo %} ({{ booking.trainNo }}) {% endif %}</h5>
+    <p><strong>From:</strong> {{ booking.source }} → <strong>To:</strong> {{ booking.destination }}</p>
+    <p><strong>Date:</strong> {{ booking.travel_date or booking.date }}</p>
+    <p><strong>Departure:</strong> {{ booking.departure or booking.departure_time }} | 
+       <strong>Arrival:</strong> {{ booking.arrival or '---' }}</p>
+    <p><strong>Passengers:</strong> {{ booking.num_persons or booking.passengers }}</p>
+    <p><strong>Class:</strong> {{ booking.class or booking.train_type or booking.vehicle_type }} | 
+       <strong>Fare:</strong> ₹{{ booking.price or booking.price_per_person }}</p>
+</div>
+
+<div class="screen">Seats View</div>
+
+<form method="POST" action="/select_seats">
+    {% for row in range(1, 7) %}
+        <div class="seat-row">
+            {% for col in range(1, 7) %}
+                {% set seat_id = "R" ~ row ~ "S" ~ col %}
+                <div class="seat" onclick="toggleSeat(this)" data-seat="{{ seat_id }}">{{ seat_id }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    <input type="hidden" name="selected_seats" id="selectedSeatsInput">
+    <button type="submit" class="btn btn-submit" id="submitBtn" disabled>Confirm Seat Selection</button>
+</form>
+
+<script>
+    const selectedSeats = new Set();
+    const maxSeats = parseInt("{{ booking.num_persons or booking.passengers or 1 }}");
+
+    function toggleSeat(seat) {
+        const seatId = seat.getAttribute('data-seat');
+
+        if (seat.classList.contains('occupied')) return;
+
+        if (seat.classList.contains('selected')) {
+            seat.classList.remove('selected');
+            selectedSeats.delete(seatId);
+        } else {
+            if (selectedSeats.size >= maxSeats) {
+                alert(`⚠️ You can only select ${maxSeats} seat${maxSeats > 1 ? 's' : ''}.`);
+                return;
+            }
+            seat.classList.add('selected');
+            selectedSeats.add(seatId);
+        }
+
+        document.getElementById('selectedSeatsInput').value = Array.from(selectedSeats).join(',');
+        document.getElementById('submitBtn').disabled = selectedSeats.size === 0;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bus Booking - TravelGo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url('{{ url_for("static", filename="images/booking_bg.avif") }}');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      font-family: 'Segoe UI', sans-serif;
+      color: #333;
+    }
+
+    header {
+      background-color: #004aad;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 26px;
+      margin: 0;
+    }
+
+    header nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    header nav a:hover {
+      color: #ffdd57;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      color: #004aad;
+      margin-bottom: 25px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    select, input[type="date"], input[type="number"] {
+      flex: 1 1 160px;
+      padding: 10px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .search-btn {
+      background-color: #004aad;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .search-btn:hover {
+      background-color: #00307c;
+    }
+
+    .filters {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filters label {
+      background: #e6f0ff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .sort-row {
+      margin-bottom: 20px;
+    }
+
+    .sort-row label {
+      margin-right: 10px;
+      font-weight: 500;
+    }
+
+    .bus-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .bus-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f9fbff;
+      border: 1px solid #dbe7ff;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    }
+
+    .bus-card strong {
+      color: #004aad;
+      font-size: 17px;
+    }
+
+    .book-btn {
+      background: #00a36c;
+      color: white;
+      padding: 8px 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .book-btn:hover {
+      background: #008955;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        flex-direction: column;
+      }
+
+      .bus-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .book-btn {
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>TravelGo</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2>🚌 Search & Book Buses</h2>
+
+    <div class="form-row">
+      <select id="source">
+        <option value="">From</option>
+        <option value="Hyderabad">Hyderabad</option>
+        <option value="Vijayawada">Vijayawada</option>
+        <option value="Guntur">Guntur</option>
+      </select>
+
+      <select id="destination">
+        <option value="">To</option>
+        <option value="Hyderabad">Hyderabad</option>
+        <option value="Vijayawada">Vijayawada</option>
+        <option value="Guntur">Guntur</option>
+      </select>
+
+      <input type="date" id="date" />
+      <input type="number" id="numPersons" min="1" value="1" placeholder="No. of Persons" />
+      <button id="search-btn" class="search-btn">Search</button>
+    </div>
+
+    <div class="filters">
+      <label><input type="checkbox" id="AC" /> AC</label>
+      <label><input type="checkbox" id="Non-AC" /> Non-AC</label>
+      <label><input type="checkbox" id="Sleeper" /> Sleeper</label>
+      <label><input type="checkbox" id="Semi-Sleeper" /> Semi-Sleeper</label>
+    </div>
+
+    <div class="sort-row">
+      <label for="sort">Sort by Price:</label>
+      <select id="sort" onchange="filterBuses()">
+        <option value="">None</option>
+        <option value="low">Low to High</option>
+        <option value="high">High to Low</option>
+      </select>
+    </div>
+
+    <div id="bus-list" class="bus-list"></div>
+  </div>
+
+  <script>
+    const buses = [
+      {
+        name: "Volvo Express",
+        source: "Hyderabad",
+        destination: "Vijayawada",
+        time: "8:00 AM",
+        type: "AC Sleeper",
+        price: 600
+      },
+      {
+        name: "Orange Travels",
+        source: "Hyderabad",
+        destination: "Guntur",
+        time: "9:30 AM",
+        type: "Non-AC Sleeper",
+        price: 450
+      },
+      {
+        name: "TSRTC Deluxe",
+        source: "Vijayawada",
+        destination: "Hyderabad",
+        time: "6:00 PM",
+        type: "Semi-Sleeper",
+        price: 500
+      }
+    ];
+
+    function filterBuses() {
+      const source = document.getElementById("source").value;
+      const destination = document.getElementById("destination").value;
+      const date = document.getElementById("date").value;
+      const numPersons = parseInt(document.getElementById("numPersons").value);
+      const sort = document.getElementById("sort").value;
+      const list = document.getElementById("bus-list");
+      list.innerHTML = "";
+
+      if (!source || !destination || !date || numPersons < 1) {
+        alert("Please fill all fields correctly.");
+        return;
+      }
+
+      if (source === destination) {
+        alert("Source and destination cannot be the same.");
+        return;
+      }
+
+      const filters = {
+        AC: document.getElementById("AC").checked,
+        "Non-AC": document.getElementById("Non-AC").checked,
+        Sleeper: document.getElementById("Sleeper").checked,
+        "Semi-Sleeper": document.getElementById("Semi-Sleeper").checked
+      };
+
+      let filtered = buses.filter(b =>
+        b.source === source &&
+        b.destination === destination &&
+        (Object.values(filters).every(v => !v) || filters[b.type.split(" ")[0]])
+      );
+
+      if (sort === "low") {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (sort === "high") {
+        filtered.sort((a, b) => b.price - a.price);
+      }
+
+      if (filtered.length === 0) {
+        list.innerHTML = "<p>No buses found for this route and filters.</p>";
+        return;
+      }
+
+      filtered.forEach(bus => {
+        const card = document.createElement("div");
+        card.className = "bus-card";
+        card.innerHTML = `
+          <div>
+            <strong>${bus.name}</strong><br>
+            ${bus.type} • ${bus.time} • ₹${bus.price}/person
+          </div>
+          <button class="book-btn" onclick="bookNow('${encodeURIComponent(bus.name)}', '${bus.source}', '${bus.destination}', '${bus.time}', '${bus.type}', ${bus.price}, '${date}', ${numPersons})">
+            Book
+          </button>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function bookNow(name, source, destination, time, type, price, date, persons) {
+      const url = `/confirm_bus_details?name=${name}&source=${source}&destination=${destination}&time=${time}&type=${type}&price=${price}&date=${date}&persons=${persons}&busId=${encodeURIComponent(name)}`;
+      window.location.href = url;
+    }
+
+    document.getElementById("search-btn").addEventListener("click", filterBuses);
+  </script>
+</body>
+</html>

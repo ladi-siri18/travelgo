@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TravelGo - Home</title>
+</head>
+<body>
+    <h2>Welcome to TravelGo!</h2>
+    {% if logged_in %}
+        <p>You are logged in.</p>
+        <a href="/logout">Logout</a>
+    {% else %}
+        <a href="/login">Login</a> | 
+        <a href="./register">Register</a>
+    {% endif %}
+</body>
+</html>

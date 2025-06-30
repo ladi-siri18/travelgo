@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm Train Booking - TravelGo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f8ff;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .container {
+            max-width: 700px;
+            background: white;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #004aad;
+            margin-bottom: 30px;
+        }
+        .info {
+            margin-bottom: 15px;
+        }
+        .info label {
+            font-weight: bold;
+            color: #333;
+        }
+        .btn-proceed {
+            background-color: #004aad;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            display: block;
+            margin: 30px auto 0;
+            transition: background 0.3s ease;
+        }
+        .btn-proceed:hover {
+            background-color: #003080;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Confirm Your Train Booking</h2>
+    <div class="info"><label>Train Name:</label> {{ booking.name }}</div>
+    <div class="info"><label>Source:</label> {{ booking.source }}</div>
+    <div class="info"><label>Destination:</label> {{ booking.destination }}</div>
+    <div class="info"><label>Departure Time:</label> {{ booking.travel_time }}</div>
+    <div class="info"><label>Class Type:</label> {{ booking.vehicle_type }}</div>
+    <div class="info"><label>Travel Date:</label> {{ booking.travel_date }}</div>
+    <div class="info"><label>No. of Passengers:</label> {{ booking.num_persons }}</div>
+    <div class="info"><label>Price per Person:</label> ₹{{ booking.price_per_person }}</div>
+    <div class="info"><label>Total Price:</label> ₹{{ booking.total_price }}</div>
+
+    <!-- Proceed to seat selection -->
+    <form method="GET" action="{{ url_for('select_seats') }}">
+        <input type="hidden" name="bookingType" value="train">
+        <input type="hidden" name="name" value="{{ booking.name }}">
+        <input type="hidden" name="source" value="{{ booking.source }}">
+        <input type="hidden" name="destination" value="{{ booking.destination }}">
+        <input type="hidden" name="time" value="{{ booking.travel_time }}">
+        <input type="hidden" name="vehicleType" value="{{ booking.vehicle_type }}">
+        <input type="hidden" name="price" value="{{ booking.price_per_person }}">
+        <input type="hidden" name="date" value="{{ booking.travel_date }}">
+        <input type="hidden" name="persons" value="{{ booking.num_persons }}">
+        <button type="submit" class="btn-proceed">Proceed to Seat Selection</button>
+    </form>
+</div>
+
+</body>
+</html>
+
